@@ -1,0 +1,23 @@
+name: "[buildpacks] CI Pipeline"
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+env:
+  CSP_API_URL: https://console.cloud.vmware.com
+  CSP_API_TOKEN: ${{ secrets.CSP_API_TOKEN }}
+  VIB_ENV_TARGET_PLATFORM: 91d398a2-25c4-4cda-8732-75a3cfc179a1 # GKE 1.22 
+  VIB_PUBLIC_URL: https://cp.bromelia.vmware.com
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: checkout-repository
+      - uses: vmware-labs/vmware-image-builder-action@0.4.12
+        name: VIB
+        with:
+          pipeline: buildpacks/vib.json
+        env:
+          VIB_ENV_SHA: ${{ env.GITHUB_SHA }}

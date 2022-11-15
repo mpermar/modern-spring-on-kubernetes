@@ -1,0 +1,64 @@
+{
+    "phases": {
+      "package": {
+        "context": {
+          "resources": {
+            "url": "{SHA_ARCHIVE}",
+            "path": "/containerize/buildpack"
+          }
+        },
+        "actions": [
+          {
+            "action_id": "buildpacks",
+            "params": {
+              "application": {
+                "details": {
+                  "name": "modern-spring-on-kubernetes",
+                  "tag": "buildpacks-{VIB_ENV_SHA}"
+                }
+              },
+              "env": {
+                "BP_JVM_VERSION": "17.*"
+              }
+            }
+          }
+        ]
+      },
+      "verify": {
+        "context": {
+          "resources": {
+            "url": "{SHA_ARCHIVE}",
+            "path": "/.vib/verify"
+          },
+          "target_platform": {
+            "target_platform_id": "{VIB_ENV_TARGET_PLATFORM}"
+          }
+        },
+        "actions": [
+          {
+            "action_id": "goss",
+            "params": {
+              "resources": {
+                "path": "goss"
+              },
+              "remote": {
+                "workload": "deploy-modern-spring-on-kubernetes"
+              }
+            }
+          },
+          {
+            "action_id": "trivy",
+            "params": {
+              "threshold": "IGNORE_ALL"
+            }
+          },
+          {
+            "action_id": "grype",
+            "params": {
+              "threshold": "IGNORE_ALL"
+            }
+          }
+        ]
+      }
+    }
+  }

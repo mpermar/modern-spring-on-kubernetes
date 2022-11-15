@@ -1,0 +1,7 @@
+command:
+  healthcheck:
+    exec: curl -L "http://localhost:8080/actuator/health"
+    exit-status: 0
+    stdout:
+      - "UP"
+    timeout: 20000
