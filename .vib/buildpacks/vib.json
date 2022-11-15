@@ -14,7 +14,7 @@
               "application": {
                 "details": {
                   "name": "modern-spring-on-kubernetes",
-                  "tag": "buildpacks-{VIB_ENV_SHA}"
+                  "tag": "buildpacks-{VIB_GITHUB_REF_NAME}"
                 }
               },
               "env": {
