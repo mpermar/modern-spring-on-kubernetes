@@ -20,4 +20,4 @@ jobs:
         with:
           pipeline: buildpacks/vib.json
         env:
-          VIB_ENV_SHA: ${{ env.GITHUB_SHA }}
+          VIB_ENV_SHA: ${{ github.sha }}
