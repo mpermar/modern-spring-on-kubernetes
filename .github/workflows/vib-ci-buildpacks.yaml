@@ -15,9 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         name: checkout-repository
-      - uses: vmware-labs/vmware-image-builder-action@0.4.12
-        name: VIB
-        with:
-          pipeline: buildpacks/vib.json
-        env:
-          VIB_GITHUB_REF_NAME: ${{ github.ref_name }}
+      - name: debug-info
+        run: | 
+          echo "Ref: ${{ github.ref_name }}"
+          echo "SHA: ${{ github.sha }}"
