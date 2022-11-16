@@ -15,10 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         name: checkout-repository
-      - name: debug-info
-        run: | 
-          echo "Ref: ${{ github.ref_name }}"
-          echo "SHA: ${{ github.sha }}"
       - uses: vmware-labs/vmware-image-builder-action@0.4.12
         name: VIB
         with:
