@@ -19,3 +19,9 @@ jobs:
         run: | 
           echo "Ref: ${{ github.ref_name }}"
           echo "SHA: ${{ github.sha }}"
+      - uses: vmware-labs/vmware-image-builder-action@0.4.12
+        name: VIB
+        with:
+          pipeline: buildpacks/vib.json
+        env:
+          VIB_ENV_REF: ${{ github.ref_name }}
