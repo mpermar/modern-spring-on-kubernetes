@@ -7,7 +7,7 @@ This folder contains all the `pipeline as code` components needed to run the VIB
 * `Phases` are predefined ala Maven style. There are three phases: `package`, `verify`, `publish`. 
 * Within each phase you can run many different `actions`. VIB actions are very similar to GitHub Actions. They do have an schema, they get some inputs and provide some outputs. There is a catalog of available actions at [our internal gitlab](https://gitlab.eng.vmware.com/marketplace-isv-services/verification-engine/puzzle). Note that each action is always associated to a specific lifecycle phase.
 * Phases have a working `context defined`. That context can also be defined at a `global` level. The context provides some common input for all the actions within that phase. For example:
-```
+```json
 "context": {
     "resources": {
         "url": "{SHA_ARCHIVE}",
@@ -17,7 +17,7 @@ This folder contains all the `pipeline as code` components needed to run the VIB
 ```
 provides some context to the actions about where are the resources and which folder should the actions use to run. Note that `SHA_ARCHIVE` is a special variable (we need a better name for this one) that the GitHub Action will populate prior to sending the pipeline to VIB. This particular variable points to the zip/tarball URI for the event that triggered the GitHub workflow (e.g. PR, push to main, etc.)
 * The GitHub Action replaces variables within curvy brackets (only ones starting with VIB_ENV_) from the environment. This provides a poor man's templating engine. So for example:
-```
+```json
 {
     "action_id": "buildpacks",
     "params": {
@@ -35,7 +35,7 @@ provides some context to the actions about where are the resources and which fol
 ```
 Before sending the pipeline to VIB, the GitHub action will fetch the value for VIB_ENV_REF from the environment and replace it. Here in particular we are setting the tag for the container image that will be created by the buildpacks engine.
 * Some actions need actionable code, like cypress tests, or goss scripts. That is provided through the context. For example here:
-```
+```json
 {
 "action_id": "goss",
     "params": {
@@ -48,9 +48,10 @@ Before sending the pipeline to VIB, the GitHub action will fetch the value for V
     }
 },
 ```
-we are telling the goss action that the folder with the goss scripts is at the relative path `goss`. That is relative to the context itself which points to `/verify`. In summary, [this is the file being read](.vib/verify/goss).
+we are telling the goss action that the folder with the goss scripts is at the relative path `goss`. That is relative to the context itself which points to `/verify`. In summary, [this is the file being read](verify/goss).
 * Several actions in the `verify` phase do actual verification on the containers or charts. For verifying a cloud native application, it has to be deployed. And for deploying something, you need a place. That is what we call a target platform. Today, target platforms can be pulled via API. The example here sets the target platform on the GitHub Workflow and uses `91d398a2-25c4-4cda-8732-75a3cfc179a1`. When I go to the VIB API, this is what I get for that:
-```
+```json
+bash-3.2$ curl -s -H "Authorization: Bearer ${BEARER_TOKEN}" https://cp.bromelia.vmware.com/v1/target-platforms/91d398a2-25c4-4cda-8732-75a3cfc179a1 | jq .
 {
   "architecture": "AMD_64",
   "id": "91d398a2-25c4-4cda-8732-75a3cfc179a1",
@@ -81,7 +82,7 @@ we are telling the goss action that the folder with the goss scripts is at the r
 ```
 I'm actually keeping the output intentionally short as each target platform has several different T-shirt sizes that you can choose from.
 
-Let's look at the [GitHub Workflow](.github/workflows/vib-ci-buildpacks.yaml) now.
+Let's look at the [GitHub Workflow](../.github/workflows/vib-ci-buildpacks.yaml) now.
 
 * The GitHub Action needs some variables for it to be able to run. Those variables have defaults but we always try to make it explicit. This is the bare minimal needed:
 ```
@@ -93,7 +94,7 @@ env:
 
 * What does not have a default is the `CSP_API_TOKEN`. That is a CSP token. To use VIB you need to be onboarded to an organization that has access to the service.
 * Then, invoking the action is pretty simple:
-```
+```yaml
 - uses: vmware-labs/vmware-image-builder-action@0.4.12
     name: VIB
     with:
@@ -103,6 +104,7 @@ env:
 ```
 * The action has [a few configuration parameters](https://github.com/vmware-labs/vmware-image-builder-action/blob/main/action.yml). It's still under continuous development.
 * The GitHub Action stores all the results from the pipeline as GitHub Workflow run assets. That way you can download all reports, e.g. trivy/grype, action logs, everything from GitHub itself. You will find those assets on the GitHub Action summary panel at the very bottom.
+* The GitHub Action can be run in [debug mode](https://github.com/vmware-labs/vmware-image-builder-action#enabling-debug-logging). That provides some crazy verbosity but can be good for learning the internals too. 
 
 ### Final remarks
 
@@ -114,7 +116,7 @@ The execution graph content is what contains all the details about current progr
 
 Here is a sneak peak to the above execution graph:
 
-```
+```json
 {
   "execution_graph_id": "2fe53d10-5e3e-4538-8f4a-91548b973419",
   "status": "SUCCEEDED",
@@ -173,6 +175,7 @@ Here is a sneak peak to the above execution graph:
 
 # References
 
+* My friend Dani [has a much better version](https://github.com/dani8art/modern-spring-on-kubernetes) of this repo with more ellaborated workflows. 
 * [VIB API](http://developers.eng.vmware.com/apis/content-platform/latest/).
 * [GitHub Action](https://github.com/vmware-labs/vmware-image-builder-action/).
 * [VIB Actions source code](https://gitlab.eng.vmware.com/marketplace-isv-services/verification-engine/puzzle)
